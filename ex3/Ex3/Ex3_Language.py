@@ -32,12 +32,12 @@ torch.manual_seed(42)
 
 
 
-
+data_dir = '../data/'
 ## loading data and making small subset
 ## vocab.t7 and train.t7 files should be in same folder with the code
-vocab_charToIdx = load_lua('vocab.t7')
+vocab_charToIdx = load_lua(data_dir + 'vocab.t7')
 vocab_IdxToChar = dict(zip(vocab_charToIdx.values(), vocab_charToIdx.keys()))
-full_train_byte_tensor = load_lua('train.t7')
+full_train_byte_tensor = load_lua(data_dir + 'train.t7')
 print("Number of characters in train data:")
 print(full_train_byte_tensor.size())
 small_train_byte_tensor = full_train_byte_tensor
