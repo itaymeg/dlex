@@ -41,11 +41,11 @@ class CharRNN(nn.Module):
         output, hidden = self.lstm(x, hidden)
         x = output.view(batch_size, -1)
         x = self.fc(x)
-        print('FC ' , x.size())
+        # print('FC ' , x.size())
         x = self.softmax(x)
-        print('Softmax ' , x.size())
+        # print('Softmax ' , x.size())
         # values, indices = torch.max(x, dim=1)  # max per sample in batch
-        # print('Indices ', indices.size())
+        # # print('Indices ', indices.size())
         return x, hidden
 
     def init_hidden(self, batch_size):
@@ -73,7 +73,7 @@ embed_size = hidden_size
 use_cuda = False
 vocab_size = len(vocab)
 layers = 1
-epochs = 10
+epochs = 20
 
 net = CharRNN(use_cuda, vocab_size, hidden_size, layers, embed_size)
 criterion = nn.NLLLoss()
@@ -83,50 +83,18 @@ saved_train = []
 total_loss = []
 for epoch in tqdm(range(epochs)):
     x, y = getData(train, sentence_len, batch_size)
+    x, y = x.add(-1), y.add(-1)
     hidden = net.init_hidden(batch_size)
     optimizer.zero_grad()
     loss = 0
     for charIdx in range(sentence_len):
         input, label = x[:, charIdx], y[:, charIdx]
         output, hidden = net(input, hidden)
-        print('Criterion - Output: ', output.size(), ' Label: ', label.size())
-        loss += criterion(output.view(batch_size, -1), label)
-        # saved_train.append(output, label)
-    total_loss.append(loss)
+        # print('Criterion - Output: ', output.size(), ' Label: ', label.size())
+        output = output.view(batch_size, -1)
+        loss += criterion(output, label)
+    total_loss.append(loss.data.numpy())
     loss.backward()
     optimizer.step()
-
 plt.plot(range(epochs), total_loss, marker=(4, 0))
 plt.show()
-
-
-
-
-
-
-
-#     for i in range(0,len(train_mod),128):
-#         optimizer.zero_grad()
-#         batch = train_mod[i:i+128]
-#         output = net(batch).type(dtype)
-#         label = labels[i:i+128].type(dtype)
-#         output = output.unsqueeze(0)
-#         label = label.unsqueeze(0)
-#         print('Output ', output[:5], ' Label ', label[:5])
-#
-#         loss = criterion(output, label)
-#         loss.backward()
-#         optimizer.step()
-#
-# # TODO : Fix Bugs of Loss
-# # TODO : Random Crops, Mini- Batches for faster work
-
-
-
-        
-        
-        
-
-#define model
-
-#train model
