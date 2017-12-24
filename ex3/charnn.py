@@ -68,7 +68,7 @@ def getData(samples, sentence_len, batch_size):
     return Variable(x), Variable(y)
 def save_state(net, epoch):
     file = os.path.join(state_dir, 'state_{0}.pt'.format(epoch))
-    net.save_state_dict(file)
+    torch.save(net.state_dict(), file)
 
 hidden_size = 512
 sentence_len = 128
