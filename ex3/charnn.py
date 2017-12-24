@@ -15,6 +15,7 @@ import torch.nn.functional as F
 dtype = torch.LongTensor
 #load data
 data_dir = './data/'
+state_dir = './state/'
 # train = torchfile.load(os.path.join(data_dir, 'train.t7')) #load train data
 # vocab = torchfile.load(os.path.join(data_dir, 'vocab.t7')) #load vocabulary mapping char -> index
 # vocab_rev = {a:b for b,a in vocab.items()} # index -> char
@@ -65,6 +66,9 @@ def getData(samples, sentence_len, batch_size):
         x[i, :] = sentence[:-1]
         y[i, :] = sentence[1:]
     return Variable(x), Variable(y)
+def save_state(net, epoch):
+    file = os.path.join(state_dir, 'state_{0}.pt'.format(epoch))
+    net.save_state_dict(file)
 
 hidden_size = 512
 sentence_len = 128
@@ -73,7 +77,7 @@ embed_size = hidden_size
 use_cuda = False
 vocab_size = len(vocab)
 layers = 1
-epochs = 20
+epochs = 5000
 
 net = CharRNN(use_cuda, vocab_size, hidden_size, layers, embed_size)
 criterion = nn.NLLLoss()
@@ -82,6 +86,8 @@ train_mod = train[:len(train) - len(train)%128]
 saved_train = []
 total_loss = []
 for epoch in tqdm(range(epochs)):
+    if epoch % (epochs / 10) == 0:
+        save_state(net, epoch)
     x, y = getData(train, sentence_len, batch_size)
     x, y = x.add(-1), y.add(-1)
     hidden = net.init_hidden(batch_size)
@@ -97,4 +103,9 @@ for epoch in tqdm(range(epochs)):
     loss.backward()
     optimizer.step()
 plt.plot(range(epochs), total_loss, marker=(4, 0))
-plt.show()
+plt.xlabel('epoch')
+plt.ylabel('NLL (lower is better)')
+plt.savefig('Loss_Plot.jpg')
+print('Saving State to laststate.pt')
+net.save_state_dict('laststate.pt')
+
